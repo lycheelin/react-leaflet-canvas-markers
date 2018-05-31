@@ -27,4 +27,5 @@ bower_components
 .lock-wscript
 .sass-cache
 
+.DS_Store
 .idea/

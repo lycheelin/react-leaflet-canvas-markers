@@ -4,6 +4,7 @@
   "description": "React wrapper of Leaflet.Canvas-Markers for react-laeflet",
   "main": "index.js",
   "scripts": {
+    "build": "webpack --config ./example/webpack.config.js ./example/index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "example": "webpack-dev-server --config ./example/webpack.config.js --port 3000 --open --inline --hot --env dev"
   },
