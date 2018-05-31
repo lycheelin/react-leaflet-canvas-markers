@@ -64,7 +64,8 @@ npm install # npm
 
 **3.** Start the server:
 ```bash
-yarn example
+yarn example     # yarn
+npm run example  # npm
 ```
 
 **4.** After starting the server, webpack should automatically open the following address:
