@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "example": "webpack-dev-server --config ./example/webpack.config.js --port 3000"
+    "example": "webpack-dev-server --config ./example/webpack.config.js --port 3000 --open --inline --hot --env dev"
   },
   "repository": {
     "type": "git",
