@@ -28,4 +28,5 @@ bower_components
 .sass-cache
 
 .DS_Store
+_config.yml
 .idea/
