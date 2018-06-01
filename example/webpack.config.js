@@ -42,7 +42,7 @@ module.exports = {
   output: {
     path: __dirname + '/build/',
     filename: '[name].js',
-    publicPath: 'http://localhost:8000/build'
+    publicPath: '/build/'
   },
   plugins: [
     new webpack.DefinePlugin({
