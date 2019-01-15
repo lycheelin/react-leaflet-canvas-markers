@@ -53,7 +53,7 @@ module.exports = (env) => {
         }
       }),
       // new webpack.NoErrorsPlugin(),
-      new webpack.HotModuleReplacementPlugin()
+      // new webpack.HotModuleReplacementPlugin()
     ],
     devServer: {
       contentBase: __dirname,
