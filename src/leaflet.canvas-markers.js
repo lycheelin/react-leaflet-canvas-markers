@@ -6,7 +6,7 @@
   if (typeof define === 'function' && define.amd) {
     define(['leaflet'], factory);
 
-    // define a Common JS module that relies on 'leaflet'
+  // define a Common JS module that relies on 'leaflet'
   } else if (typeof exports === 'object') {
     module.exports = factory(require('leaflet'));
   }
@@ -35,14 +35,43 @@
     },
 
     addMarker: function (marker) {
+      // console.log("addMarker")
       L.Util.stamp(marker);
 
-      if (!this._markers) this._markers = {};
+      // if (!this._markers) this._markers = {};
 
       this._markers[marker._leaflet_id] = marker;
-      this._drawMarker(marker);
+      // this._drawMarker(marker);
     },
-
+    // ----------------新增 从外面调用 --------------
+    resetMarkers: function (markers) {
+      if(!markers){
+        markers = [];
+      }
+      const srcMarkers = Object.values(this._markers);
+      const newMarkers = {};
+      let isNonePopupOpened = true;
+      markers.forEach((marker)=>{
+        const filterRes = srcMarkers.filter((m)=>(m.options.properties.vehicleNo === marker.options.properties.vehicleNo ));
+        if (filterRes.length) {
+         filterRes[0].setLatLng(marker.getLatLng());
+         if (filterRes[0]._popup && filterRes[0]._popup.isOpen()){
+          filterRes[0]._popup.setLatLng(marker.getLatLng());
+          isNonePopupOpened = false;
+         }
+         newMarkers[filterRes[0]._leaflet_id] = filterRes[0];
+        }else{
+          L.Util.stamp(marker);
+          newMarkers[marker._leaflet_id] = marker;
+        }
+      });
+      if(isNonePopupOpened && this._map._popup){
+        this._map.closePopup(this._map._popup);
+      }
+      this._markers = {...newMarkers};
+      this._reset();
+    },
+    // ---------------------新增 ---------------
     addLayer: function (layer) {
       if ((layer.options.pane == 'markerPane') && layer.options.icon) this.addMarker(layer);
       else console.error('Layer isn\'t a marker');
@@ -54,12 +83,13 @@
 
     removeMarker: function (marker, redraw) {
       delete this._markers[marker._leaflet_id];
-      if (redraw) {
-        this._redraw(true);
-      }
+      // if (redraw) {
+      //   this._redraw(true);
+      // }
     },
 
     onAdd: function (map) {
+      // console.log('+++++++++++','onAdd')
       this._map = map;
       this._onClickListeners = [];
 
@@ -76,11 +106,21 @@
       map.on('moveend', this._reset, this);
       map.on('click', this._executeClickListeners, this);
       map.on('zoomstart', this._clearLayer, this);
-      map.on('mousemove', L.Util.throttle(this._handleMouseHover, 120, this), this);
+      map.on('mousemove', this._onMouseMove, this);
+      this._reset();
     },
     _clearLayer:function () {
       this._context && this._context.clearRect(0, 0, this._canvas.width, this._canvas.height);
     },
+    clearLayers: function() {
+
+      this._latlngMarkers = null;
+      this._markers = {};
+      this._redraw(true);
+  },
+  _onMouseMove:function (event) {
+    this._handleMouseHover(event);
+  },
     _handleMouseHover:function(event){
       L.DomUtil.removeClass(this._canvas, 'leaflet-interactive');
       for (var markerId in this._markers) {
@@ -94,6 +134,7 @@
       }
     },
     onRemove: function (map) {
+      // console.log('-----------','onRemove')
       if (this.options.pane) {
         this.getPane().removeChild(this._canvas);
       } else {
@@ -102,7 +143,16 @@
       map.off('moveend', this._reset, this);
       map.off('click', this._executeClickListeners, this);
       map.off('zoomstart', this._clearLayer, this);
-      map.off('mousemove', L.Util.throttle(this._handleMouseHover, 120, this), this);
+      map.off('mousemove', this._onMouseMove, this);
+      Object.keys(this._markers).forEach(function(item){
+        const popup = this._markers[item]._popup;
+        if(popup && popup.isOpen()){
+          map.closePopup(popup);
+          return false;
+        }
+      }, this)
+
+      // L.DomEvent.removeListener(map,'mousemove')
     },
 
     addTo: function (map) {
@@ -121,7 +171,7 @@
           self._drawImage(marker, pointPos);
         }
       } else {
-        self._drawImage(marker, pointPos);
+         self._drawImage(marker, pointPos);
       }
     },
 
@@ -130,12 +180,12 @@
       // this._context.rotate(30 * Math.PI / 180);//旋转30度
       // 把下面 pointPos.x 和 pointPos.y 都改为 0
       this._context.drawImage(
-        marker.canvas_img,
-        pointPos.x - marker.options.icon.options.iconAnchor[0],
-        pointPos.y - marker.options.icon.options.iconAnchor[1],
-        marker.options.icon.options.iconSize[0],
-        marker.options.icon.options.iconSize[1]
-      );
+          marker.canvas_img,
+          pointPos.x - marker.options.icon.options.iconAnchor[0],
+          pointPos.y - marker.options.icon.options.iconAnchor[1],
+          marker.options.icon.options.iconSize[0],
+          marker.options.icon.options.iconSize[1]
+        );
       // this._context.rotate(330 * Math.PI / 180);//旋转 360 - 30 度 复原
       // this._context.translate(-pointPos.x,-pointPos.y)
     },
@@ -152,8 +202,9 @@
     },
 
     _redraw: function (clear) {
+      // console.log('_redraw',clear);
       if (!this._map) {
-        return;
+          return;
       }
 
       if (clear) {

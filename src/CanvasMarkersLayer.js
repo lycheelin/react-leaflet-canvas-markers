@@ -34,7 +34,7 @@ export default class CanvasMarkersLayer extends MapLayer {
   }
   initEventListeners(layer) {
     layer.addOnClickListener((event, marker) => {
-      this.props.onMarkerClick && this.props.onMarkerClick(event, marker);
+      this.props.onMarkerClick(event, marker);
       if (marker._popup) {
         marker._popup.setLatLng(marker._latlng).openOn(this.context.map);
       }
@@ -80,6 +80,11 @@ export default class CanvasMarkersLayer extends MapLayer {
 }
 CanvasMarkersLayer.propTypes = {
   children: PropTypes.node,
-  options: PropTypes.object,
+  options: PropTypes.shape({}),
   onMarkerClick: PropTypes.func,
+};
+CanvasMarkersLayer.defaultProps = {
+  children: null,
+  options: {},
+  onMarkerClick: () => {},
 };
