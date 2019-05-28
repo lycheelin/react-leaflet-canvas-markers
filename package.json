@@ -55,7 +55,7 @@
     "react": "^16.4.0",
     "react-addons-test-utils": "^0.14.7",
     "react-dom": "^16.7.0",
-    "react-leaflet": "^1.9.1",
+    "react-leaflet": "^2.3.0",
     "react-transform-hmr": "^1.0.4",
     "url-loader": "^1.0.1",
     "webpack": "^4.28.4",

@@ -1,90 +1,83 @@
 import PropTypes from 'prop-types';
-import { MapLayer } from 'react-leaflet';
+import { MapLayer, withLeaflet } from 'react-leaflet';
 import L from 'leaflet';
 import { isEqual } from 'lodash';
-
-require('./leaflet.canvas-markers');
-// require('../node_modules/leaflet-canvas-marker/src/leaflet.canvas-markers');
+import './leaflet.canvas-markers';
 
 const getType = (ob) => {
   if (ob instanceof Array) {
     return 'array';
-  } else if (typeof (ob) === 'object') {
+  } if (typeof (ob) === 'object') {
     return 'object';
   }
   return typeof (ob);
 };
 
-export default class CanvasMarkersLayer extends MapLayer {
-  static childContextTypes = {
-    layerContainer: PropTypes.shape({
-      addLayer: PropTypes.func.isRequired,
-      removeLayer: PropTypes.func.isRequired,
-    }),
+class CanvasMarkersLayer extends MapLayer {
+  static propTypes = {
+    children: PropTypes.node,
+    options: PropTypes.shape({}),
+    onMarkerClick: PropTypes.func,
   }
-  componentWillMount() {
-    const { options } = this.props;
-    this.leafletElement = L.canvasIconLayer(options || this.props);
-    this.leafletElement.addTo(this.context.map);
-    this.initEventListeners(this.leafletElement);
-  }
-  componentDidMount() {
-    /* eslint-disable no-underscore-dangle */
-    this.leafletElement._reset();
-  }
-  initEventListeners(layer) {
-    layer.addOnClickListener((event, marker) => {
-      this.props.onMarkerClick(event, marker);
-      if (marker._popup) {
-        marker._popup.setLatLng(marker._latlng).openOn(this.context.map);
-      }
-    });
-  }
-  getLeafletElement() {
-    return this.leafletElement;
-  }
-  getChildContext() {
-    return {
-      layerContainer: this.leafletElement,
-    };
-  }
-  /* eslint-disable class-methods-use-this*/
+
+  static defaultProps = {
+    children: null,
+    options: {},
+    onMarkerClick: () => {},
+  };
+
   createLeafletElement(props) {
-    return L.canvasIconLayer(props.options || props);
+    const el = L.canvasIconLayer(props.options || props);
+    this.contextValue = {
+      ...props.leaflet,
+      layerContainer: el,
+      popupContainer: el,
+    };
+    return el;
   }
+
   updateLeafletElement(fromProps, toProps) {
+    // console.log('object fromProps toProps', fromProps, toProps);
     if (this.checkProsEqual(fromProps.children, toProps.children)) {
       return;
     }
     this.leafletElement.redraw();
   }
+
+  componentDidMount() {
+    super.componentDidMount();
+    this.initEventListeners(this.leafletElement);
+    /* eslint-disable no-underscore-dangle */
+    this.leafletElement._reset();
+  }
+
+  initEventListeners(layer) {
+    layer.addOnClickListener((event, marker) => {
+      this.props.onMarkerClick(event, marker);
+      if (marker._popup) {
+        marker._popup.setLatLng(marker._latlng).openOn(layer._map);
+      }
+    });
+  }
+
   checkProsEqual(from, to) {
+    if (!from && !to) {
+      return true;
+    }
     const dataKey = this.props.dataKey || 'position';
     // console.log(dataKey);
     if ((getType(from) !== 'array' && getType(to) !== 'object') || (getType(from) !== 'object' && getType(to) !== 'array')) {
       return false;
     }
-    if ((getType(from) === 'object' && getType(to) === 'object')) {
+    if (getType(from) === 'object' && getType(to) === 'object') {
       return isEqual(from.props[dataKey], to.props[dataKey]);
     }
     if (from.length !== to.length) {
       return false;
     }
-    for (let i = 0; i < from.length; i++) {
-      if (!isEqual(from[i].props[dataKey], to[i].props[dataKey])) {
-        return false;
-      }
-    }
-    return true;
+    const isNotEqual = from.some((item, index) => !isEqual(item.props[dataKey], to[index].props[dataKey]));
+    return !isNotEqual;
   }
 }
-CanvasMarkersLayer.propTypes = {
-  children: PropTypes.node,
-  options: PropTypes.shape({}),
-  onMarkerClick: PropTypes.func,
-};
-CanvasMarkersLayer.defaultProps = {
-  children: null,
-  options: {},
-  onMarkerClick: () => {},
-};
+
+export default withLeaflet(CanvasMarkersLayer);
