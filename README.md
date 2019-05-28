@@ -8,6 +8,8 @@ for [react-leaflet](https://github.com/PaulLeCam/react-leaflet)
 
 Leaflet plugin for displaying markers on canvas instead of DOM. Working with Leaflet 1.0.0 and above.
 
+react-leaflet v2.x support
+
 > **Note: Before getting started, please see these useful guides:**
 > - [Leaflet Quick Start Guide](http://leafletjs.com/examples/quick-start/).
 > - [react-leaflet Installation](https://react-leaflet.js.org/docs/en/installation.html).
