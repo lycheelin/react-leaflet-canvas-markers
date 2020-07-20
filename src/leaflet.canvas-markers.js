@@ -191,13 +191,6 @@
     },
 
     _reset: function () {
-      var topLeft = this._map.containerPointToLayerPoint([0, 0]);
-      L.DomUtil.setPosition(this._canvas, topLeft);
-
-      var size = this._map.getSize();
-
-      this._canvas.width = size.x;
-      this._canvas.height = size.y;
       this._redraw();
     },
 
@@ -206,7 +199,15 @@
       if (!this._map) {
           return;
       }
+      
+      var topLeft = this._map.containerPointToLayerPoint([0, 0]);
+      L.DomUtil.setPosition(this._canvas, topLeft);
 
+      var size = this._map.getSize();
+
+      this._canvas.width = size.x;
+      this._canvas.height = size.y;
+      
       if (clear) {
         this._context.clearRect(0, 0, this._canvas.width, this._canvas.height);
       }
